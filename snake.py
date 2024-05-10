@@ -33,7 +33,7 @@ pygame.display.set_caption('Snake')
 running = True
 
 while running:
-    for event in pygame.event_loop:
+    for event in pygame.event.get():  # Fixed this line
         if event.type == pygame.QUIT:
             running = False
 
