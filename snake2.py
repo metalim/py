@@ -1,5 +1,4 @@
 import pygame
-import time
 import random
 
 pygame.init()
@@ -16,7 +15,7 @@ blue = (50, 153, 213)
 dis_width = 800
 dis_height = 600
 dis = pygame.display.set_mode((dis_width, dis_height))
-pygame.display.set_caption('Snake Game by Edureka')
+pygame.display.set_caption('Snake Game with Autoplay')
 
 clock = pygame.time.Clock()
 snake_block = 10
@@ -53,6 +52,8 @@ def gameLoop():
     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
     foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
 
+    autoplay = True  # Включаем режим автопилота
+
     while not game_over:
 
         while game_close == True:
@@ -72,7 +73,7 @@ def gameLoop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and not autoplay:
                 if event.key == pygame.K_LEFT:
                     x1_change = -snake_block
                     y1_change = 0
@@ -85,6 +86,20 @@ def gameLoop():
                 elif event.key == pygame.K_DOWN:
                     y1_change = snake_block
                     x1_change = 0
+
+        if autoplay:
+            if x1 < foodx:
+                x1_change = snake_block
+                y1_change = 0
+            elif x1 > foodx:
+                x1_change = -snake_block
+                y1_change = 0
+            elif y1 < foody:
+                y1_change = snake_block
+                x1_change = 0
+            elif y1 > foody:
+                y1_change = -snake_block
+                x1_change = 0
 
         # Проход змейки через стенки
         if x1 >= dis_width:
