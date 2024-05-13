@@ -91,26 +91,35 @@ def main():
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(0)
 
-    # Get the location of the time uniform
+    # Get the location of the uniforms
     time_location = glGetUniformLocation(shader, 'time')
 
     # Main loop
     running = True
     start_time = time.time()
+    accumulated_time = 0.0
+    speed = 1.0
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
+            elif event.type == KEYDOWN:
+                if event.key == K_UP:
+                    speed += 0.1
+                elif event.key == K_DOWN:
+                    speed -= 0.1
 
         # Calculate the elapsed time
         current_time = time.time()
-        elapsed_time = current_time - start_time
+        frame_time = current_time - start_time
+        start_time = current_time
+        accumulated_time += frame_time * speed
 
         # Clear the screen
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # Update the time uniform
-        glUniform1f(time_location, elapsed_time)
+        # Update the uniforms
+        glUniform1f(time_location, accumulated_time)
 
         # Draw the quad
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
