@@ -19,7 +19,7 @@ pygame.display.set_caption('Snake Game with Improved Autoplay')
 
 clock = pygame.time.Clock()
 snake_block = 10
-snake_speed = 1000
+snake_speed = 15
 
 font_style = pygame.font.SysFont(None, 50)
 score_font = pygame.font.SysFont(None, 35)
@@ -29,8 +29,14 @@ def Your_score(score):
     dis.blit(value, [0, 0])
 
 def our_snake(snake_block, snake_list):
-    for x in snake_list:
-        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
+    for i, x in enumerate(snake_list):
+        if i == 0:
+            color = red  # голова
+        elif i == len(snake_list) - 1:
+            color = green  # хвост
+        else:
+            color = black  # тело
+        pygame.draw.rect(dis, color, [x[0], x[1], snake_block, snake_block])
 
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
@@ -147,7 +153,7 @@ def gameLoop():
         x1 += x1_change
         y1 += y1_change
         dis.fill(blue)
-        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+        pygame.draw.rect(dis, yellow, [foodx, foody, snake_block, snake_block])
         snake_Head = []
         snake_Head.append(x1)
         snake_Head.append(y1)
