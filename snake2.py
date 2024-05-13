@@ -15,11 +15,11 @@ blue = (50, 153, 213)
 dis_width = 800
 dis_height = 600
 dis = pygame.display.set_mode((dis_width, dis_height))
-pygame.display.set_caption('Snake Game with Autoplay')
+pygame.display.set_caption('Snake Game with Improved Autoplay')
 
 clock = pygame.time.Clock()
 snake_block = 10
-snake_speed = 15
+snake_speed = 1000
 
 font_style = pygame.font.SysFont(None, 50)
 score_font = pygame.font.SysFont(None, 35)
@@ -35,6 +35,48 @@ def our_snake(snake_block, snake_list):
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
     dis.blit(mesg, [dis_width / 6, dis_height / 3])
+
+def is_collision_with_self(snake_List, x, y):
+    for segment in snake_List:
+        if segment[0] == x and segment[1] == y:
+            return True
+    return False
+
+def get_next_move(x, y, foodx, foody, snake_List):
+    directions = [
+        (snake_block, 0),  # RIGHT
+        (-snake_block, 0), # LEFT
+        (0, -snake_block), # UP
+        (0, snake_block)   # DOWN
+    ]
+
+    safe_moves = []
+    for move in directions:
+        new_x = x + move[0]
+        new_y = y + move[1]
+
+        # Проход змейки через стенки
+        if new_x >= dis_width:
+            new_x = 0
+        elif new_x < 0:
+            new_x = dis_width - snake_block
+        if new_y >= dis_height:
+            new_y = 0
+        elif new_y < 0:
+            new_y = dis_height - snake_block
+
+        if not is_collision_with_self(snake_List, new_x, new_y):
+            safe_moves.append((new_x, new_y, move))
+
+    best_move = None
+    min_distance = float('inf')
+    for new_x, new_y, move in safe_moves:
+        distance = abs(new_x - foodx) + abs(new_y - foody)
+        if distance < min_distance:
+            min_distance = distance
+            best_move = move
+
+    return best_move
 
 def gameLoop():
     game_over = False
@@ -88,18 +130,9 @@ def gameLoop():
                     x1_change = 0
 
         if autoplay:
-            if x1 < foodx:
-                x1_change = snake_block
-                y1_change = 0
-            elif x1 > foodx:
-                x1_change = -snake_block
-                y1_change = 0
-            elif y1 < foody:
-                y1_change = snake_block
-                x1_change = 0
-            elif y1 > foody:
-                y1_change = -snake_block
-                x1_change = 0
+            next_move = get_next_move(x1, y1, foodx, foody, snake_List)
+            if next_move:
+                x1_change, y1_change = next_move
 
         # Проход змейки через стенки
         if x1 >= dis_width:
