@@ -7,8 +7,8 @@ import time
 
 # Vertex shader source code
 vertex_shader = """
-#version 120
-attribute vec4 position;
+#version 330 core
+layout(location = 0) in vec4 position;
 void main()
 {
     gl_Position = position;
@@ -17,7 +17,8 @@ void main()
 
 # Fragment shader source code
 fragment_shader = """
-#version 120
+#version 330 core
+out vec4 outColor;
 uniform float time;
 void main()
 {
@@ -36,7 +37,7 @@ void main()
     float g = 0.5 + 0.5 * cos(combinedWaves * 2.0 - time);
     float b = 0.5 + 0.5 * sin(combinedWaves * 4.0 + time * 0.5);
 
-    gl_FragColor = vec4(r, g, b, 1.0);
+    outColor = vec4(r, g, b, 1.0);
 }
 """
 
@@ -48,10 +49,26 @@ def create_shader_program(vertex_src, fragment_src):
     return shader
 
 def main():
-    # Initialize Pygame and set up the window
+    # Initialize Pygame
     pygame.init()
-    screen = pygame.display.set_mode((800, 600), DOUBLEBUF | OPENGL)
+
+    # Set OpenGL attributes
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
+
+    # Attempt to create an OpenGL context
+    try:
+        screen = pygame.display.set_mode((800, 600), DOUBLEBUF | OPENGL)
+    except pygame.error as e:
+        print(f"Failed to create OpenGL 3.3 context: {e}")
+        return
+
     pygame.display.set_caption('Animated Shader Demo')
+
+    # Create a Vertex Array Object (VAO)
+    vao = glGenVertexArrays(1)
+    glBindVertexArray(vao)
 
     # Compile and use the shader program
     shader = create_shader_program(vertex_shader, fragment_shader)
@@ -70,10 +87,9 @@ def main():
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertex_data.nbytes, vertex_data, GL_STATIC_DRAW)
 
-    # Get the position attribute location from the shader program
-    position_location = glGetAttribLocation(shader, 'position')
-    glEnableVertexAttribArray(position_location)
-    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, None)
+    # Define the layout of the vertex data
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, None)
+    glEnableVertexAttribArray(0)
 
     # Get the location of the time uniform
     time_location = glGetUniformLocation(shader, 'time')
@@ -104,6 +120,7 @@ def main():
 
     # Cleanup
     glDeleteBuffers(1, [vbo])
+    glDeleteVertexArrays(1, [vao])
     glDeleteProgram(shader)
     pygame.quit()
 
